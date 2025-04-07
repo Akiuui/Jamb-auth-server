@@ -1,6 +1,8 @@
 import UserSchema from "../models/User.js"
 import pino from "pino"
 import jwt from "jsonwebtoken"
+import generateToken from "./generateToken.js"
+import setTokenCookie from "./setTokenCookie.js"
 
 const logger = pino()
 
@@ -50,10 +52,13 @@ export const Login = async (req, res) => {
 
         logger.info("Successfuly compared them")
     
-        // Generate JWT token
-        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' }); // IMPORTANT: use env variables.
-        res.json({ token, userId: user._id});
-      } catch (err) {
+        const token = generateToken(user)
+ 
+        setTokenCookie(res, token)
+
+        res.json({ message: 'Login successful' });
+
+    } catch (err) {
         res.status(500).json({ message: err.message });
       }
 }
